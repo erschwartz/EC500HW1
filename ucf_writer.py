@@ -254,7 +254,28 @@ def writeUCF(table, header_map):
     print json.dumps(ucf, indent=2)
 
 
+def convert_csv_to_ucf(csvpath):
 
+    with open(csvpath) as csvfile:
+        csvreader = csv.reader(csvfile, delimiter=',')
+
+        # Header
+        headers = next(csvreader, None)
+        header_map = {}
+        i = 0
+        for col in headers:
+            header_map[col] = i
+            i = i + 1
+
+        # Table
+        table = []
+        for row in csvreader:
+            values = []
+            for col in row:
+                values.append(col)
+            table.append(row)
+
+        writeUCF(table, header_map)
 
 if __name__ == '__main__':
     
@@ -291,30 +312,7 @@ if __name__ == '__main__':
 
 
     csvpath = sys.argv[1]
-
-        
-
-    with open(csvpath) as csvfile:
-        csvreader = csv.reader(csvfile, delimiter=',')
-
-        # Header
-        headers = next(csvreader, None)
-        header_map = {}
-        i = 0
-        for col in headers:
-            header_map[col] = i
-            i = i+1
-
-        # Table
-        table = []
-        for row in csvreader:
-            values = []
-            for col in row:
-                values.append(col)
-            table.append(row)
-
-
-        writeUCF(table, header_map)
+    convert_csv_to_ucf(csvpath)
 
     
 

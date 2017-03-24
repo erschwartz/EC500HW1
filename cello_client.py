@@ -5,6 +5,12 @@ import click
 from requests.auth import HTTPBasicAuth
 from Bio import SeqIO
 
+jobid = None
+inputs = None
+outputs = None
+verilog = None
+options = None
+
 class CtxObject(object):
     def __init__(self):
         self.url_root = "http://cellocad.org:8080"
@@ -27,9 +33,10 @@ def result(r):
 @click.group()
 @click.version_option()
 @click.pass_context
-def cli(ctx):
+def cli(ctx, jobid, inputs, outputs, verilog, options):
     """Command-line interface for Cello genetic circuit design"""
     ctx.obj = CtxObject()
+    ctx.invoke(submit, jobid=jobid, inputs=inputs, outputs=outputs, verilog=verilog, options=options)
 
 
 @cli.command()
@@ -152,9 +159,6 @@ def delete_output(ctx, name):
     r = requests.delete(endpoint, auth=ctx.obj.auth)
     result(r)
 
-
-
-
 @cli.command()
 @click.option('--verilog', type=click.Path(exists=True), required=True, help='verilog file path.')
 @click.pass_context
@@ -168,13 +172,12 @@ def netsynth(ctx, verilog):
     r = requests.post(endpoint, params=params, auth=ctx.obj.auth)
     result(r)
 
-
 @cli.command()
-@click.option('--jobid', type=click.STRING, required=True, help='job id/name.')
-@click.option('--verilog', type=click.Path(exists=True), required=True, help='verilog file.')
-@click.option('--inputs', type=click.Path(exists=True), required=True, help='input promoters file.')
-@click.option('--outputs', type=click.Path(exists=True), required=True, help='output genes file.')
-@click.option('--options', type=click.STRING, help='additional dash-separated options.')
+@click.option('--jobid', type=click.STRING, required=True, help='job id/name.', default=jobid)
+@click.option('--verilog', type=click.Path(exists=True), required=True, help='verilog file.',default=verilog)
+@click.option('--inputs', type=click.Path(exists=True), required=True, help='input promoters file.', default=inputs)
+@click.option('--outputs', type=click.Path(exists=True), required=True, help='output genes file.', default=outputs)
+@click.option('--options', type=click.STRING, help='additional dash-separated options.', default=options)
 @click.pass_context
 def submit(ctx, jobid, verilog, inputs, outputs, options):
 
@@ -369,22 +372,25 @@ def get_netlist(ctx, jobid, inputs, outputs, verilog, options):
     return r.text
 
 def post_result(ctx, jobid, inputs, outputs, verilog, options):
-    endpoint = ctx.url_root + "/submit"
+    ctx.invoke(submit, jobid=jobid, inputs=inputs, outputs=outputs, verilog=verilog, options=options)
+    # submit(ctx, jobid, inputs, outputs, verilog, options)
+    # endpoint = ctx.url_root + "/submit"
+    #
+    # script_dir = os.path.dirname(__file__)
+    # inputs = os.path.join(script_dir, inputs)
+    # outputs = os.path.join(script_dir, outputs)
+    # verilog = os.path.join(script_dir, verilog)
+    #
+    # inputs_text = open(inputs, 'r').read()
+    # outputs_text = open(outputs, 'r').read()
+    # verilog_text = open(verilog, 'r').read()
+    #
+    # params = {}
+    # params['id'] = jobid
+    # params['input_promoter_data'] = inputs_text
+    # params['output_gene_data'] = outputs_text
+    # params['verilog_text'] = verilog_text
+    # params['options'] = options
+    #
+    # r = requests.post(endpoint, params=params, auth=ctx.auth)
 
-    script_dir = os.path.dirname(__file__)
-    inputs = os.path.join(script_dir, inputs)
-    outputs = os.path.join(script_dir, outputs)
-    verilog = os.path.join(script_dir, verilog)
-
-    inputs_text = open(inputs, 'r').read()
-    outputs_text = open(outputs, 'r').read()
-    verilog_text = open(verilog, 'r').read()
-
-    params = {}
-    params['id'] = jobid
-    params['input_promoter_data'] = inputs_text
-    params['output_gene_data'] = outputs_text
-    params['verilog_text'] = verilog_text
-    params['options'] = options
-
-    r = requests.post(endpoint, params=params, auth=ctx.auth)

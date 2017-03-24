@@ -33,10 +33,9 @@ def result(r):
 @click.group()
 @click.version_option()
 @click.pass_context
-def cli(ctx, jobid, inputs, outputs, verilog, options):
+def cli(ctx):
     """Command-line interface for Cello genetic circuit design"""
     ctx.obj = CtxObject()
-    ctx.invoke(submit, jobid=jobid, inputs=inputs, outputs=outputs, verilog=verilog, options=options)
 
 
 @cli.command()
@@ -159,18 +158,18 @@ def delete_output(ctx, name):
     r = requests.delete(endpoint, auth=ctx.obj.auth)
     result(r)
 
-@cli.command()
-@click.option('--verilog', type=click.Path(exists=True), required=True, help='verilog file path.')
-@click.pass_context
-def netsynth(ctx, verilog):
-    endpoint = ctx.obj.url_root + "/netsynth"
-    verilog_text = open(verilog, 'r').read()
+#@cli.command()
+#@click.option('--verilog', type=click.Path(exists=True), required=True, help='verilog file path.')
+#@click.pass_context
+    def netsynth(ctx, verilog):
+        endpoint = ctx.obj.url_root + "/netsynth"
+        verilog_text = open(verilog, 'r').read()
 
-    params = {}
-    params['verilog_text'] = verilog_text
+        params = {}
+        params['verilog_text'] = verilog_text
 
-    r = requests.post(endpoint, params=params, auth=ctx.obj.auth)
-    result(r)
+        r = requests.post(endpoint, params=params, auth=ctx.obj.auth)
+        result(r)
 
 @cli.command()
 @click.option('--jobid', type=click.STRING, required=True, help='job id/name.', default=jobid)
@@ -393,4 +392,37 @@ def post_result(ctx, jobid, inputs, outputs, verilog, options):
     # params['options'] = options
     #
     # r = requests.post(endpoint, params=params, auth=ctx.auth)
+
+_cello_url = "http://cellocad.org:8080"
+
+def submit_job(self,
+               job_name,
+               verilog_path,
+               promoter_path,
+               outputs_path,
+               opt_str=""):
+
+                script_dir = os.path.dirname(__file__)
+                promoter_path = os.path.join(script_dir, promoter_path)
+                outputs_path = os.path.join(script_dir, outputs_path)
+                verilog_path = os.path.join(script_dir, verilog_path)
+                """Submit a job to run on CelloCad's server"""
+                with open(verilog_path, "r") as v, open(promoter_path, "r") as p, open(outputs_path, "r") as o:
+                    v_content = v.read()
+                    p_content = p.read()
+                    o_content = o.read()
+                    r = requests.post(_cello_url + "/submit",
+                                      auth=self._auth,
+                                      data={"id": job_name,
+                                            "verilog_text": v_content,
+                                            "input_promoter_data": p_content,
+                                            "output_gene_data": o_content,
+                                            "options": opt_str})
+                    if r.status_code != 200:
+                        raise Exception()
+
+
+if __name__ == '__main__':
+    cli()
+
 

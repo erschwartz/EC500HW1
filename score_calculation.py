@@ -1,4 +1,4 @@
-def calculate_response_function_not(input, gate, needed_gate=None):
+def calculate_response_function_not(input, gate, is_promoter_op):
     """
     This function is responsible for calculating the score or response functions values of a single
     not gate.
@@ -8,16 +8,16 @@ def calculate_response_function_not(input, gate, needed_gate=None):
     :param needed_gate: This is useful for our optimization functions only. It will return the xmin and xmax of the gate early.
     :return: The return value will be None if not for the needed_gate, or at the end of the graph.
     """
-    gate.output.xmin = calculate_response_function(input.xmax, gate)
-    gate.output.xmax = calculate_response_function(input.xmin, gate)
 
-    if needed_gate == gate:
-        return (gate.output.xmin, gate.output.xmax)
+    if not is_promoter_op:
+        gate.output.xmin = calculate_response_function(input.xmax, gate)
+        gate.output.xmax = calculate_response_function(input.xmin, gate)
+
     # AT END
     if gate.output.gate is None:
         return calculate_score(gate.output.xmin, gate.output.xmax)
 
-def calculate_response_function_nor(input_1, input_2, gate, needed_gate=None):
+def calculate_response_function_nor(input_1, input_2, gate, is_promoter_op):
     """
     This function is responsible for calculating the score or response functions values of a single
     nor gate.
@@ -25,21 +25,19 @@ def calculate_response_function_nor(input_1, input_2, gate, needed_gate=None):
     :param input_1: The first input into the gate.
     :param input_2: The second input into the gate.
     :param gate: The gate in question.
-    :param needed_gate: This is useful for our optimization functions only. It will return the xmin and xmax of the gate early.
     :return: The return value will be None if not for the needed_gate, or at the end of the graph.
     """
-    #ON-MIN
-    gate.output.xmax = calculate_response_function(input_1.xmin + input_2.xmin, gate)
 
-    #OFF-MAX
-    y1 = calculate_response_function(input_1.xmax + input_2.xmax, gate)
-    y2 = calculate_response_function(input_1.xmax + input_2.xmin, gate)
-    y3 = calculate_response_function(input_1.xmin + input_2.xmax, gate)
-    gate.output.xmin = max(y1, y2, y3)
+    if not is_promoter_op:
+        #ON-MIN
+        gate.output.xmax = calculate_response_function(input_1.xmin + input_2.xmin, gate)
 
-    if needed_gate == gate:
-        return (gate.output.xmin, gate.output.xmax)
-    #AT END
+        #OFF-MAX
+        y1 = calculate_response_function(input_1.xmax + input_2.xmax, gate)
+        y2 = calculate_response_function(input_1.xmax + input_2.xmin, gate)
+        y3 = calculate_response_function(input_1.xmin + input_2.xmax, gate)
+        gate.output.xmin = max(y1, y2, y3)
+
     if gate.output.gate is None:
         return calculate_score(gate.output.xmin, gate.output.xmax)
 
@@ -63,7 +61,7 @@ def calculate_score(xmin, xmax):
     """
     return xmax / xmin
 
-def topology_score_finder(starting_inputs, needed_gate=None):
+def topology_score_finder(starting_inputs, is_promoter_op=False):
     """
     This algorithm is influenced by a topological sort algorithm in which inputs needed to be completed in a certain order.
     Because our data structure is based off of a graph, we thought this would be most efficient.
@@ -86,14 +84,14 @@ def topology_score_finder(starting_inputs, needed_gate=None):
     while (score == None):
         for name, input in seen_inputs.iteritems():
             if input.gate is not None and len(input.gate.inputs) == 1:
-                score = calculate_response_function_not(input, input.gate, needed_gate)
+                score = calculate_response_function_not(input, input.gate, is_promoter_op)
                 seen_inputs[input.gate.output.name] = input.gate.output
                 del seen_inputs[input.name]
                 break
             elif ((input.gate.inputs[0] == input or input.gate.inputs[0].name in seen_inputs.keys()) and (input.gate.inputs[1] == input or input.gate.inputs[1].name in seen_inputs.keys())):
                 input_2_name = input.gate.inputs[0].name if input.gate.inputs[0].name != name else input.gate.inputs[1].name
                 input_2 = seen_inputs[input_2_name]
-                score = calculate_response_function_nor(input, input_2, input.gate, needed_gate)
+                score = calculate_response_function_nor(input, input_2, input.gate, is_promoter_op)
                 seen_inputs[input.gate.output.name] = input.gate.output
                 del seen_inputs[input.name]
                 del seen_inputs[input_2.name]

@@ -2,10 +2,10 @@ pTac            01010101
 pTet            00110011
 pBAD            00001111
 S2_SrpR         pPhlF
-P2_PhlF         pBM3R1    pBetI
-E1_BetI         pPsrA
-R1_PsrA         pAmtR     pHlyIIR
+P2_PhlF         pBM3R1    pHlyIIR
+H1_HlyIIR       pBetI
+E1_BetI         pAmtR     pAmeR
 B3_BM3R1        pTac
-H1_HlyIIR       pTet
+F1_AmeR         pTet
 A1_AmtR         pBAD
 YFP             pSrpR

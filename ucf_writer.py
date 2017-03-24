@@ -3,6 +3,7 @@
 import csv
 import sys
 import json
+import os
 
 
 
@@ -251,7 +252,7 @@ def writeUCF(table, header_map):
     ucf.extend(parts)
     ucf.append(eugene)
 
-    print json.dumps(ucf, indent=2)
+    return json.dumps(ucf, indent=2)
 
 
 def convert_csv_to_ucf(csvpath):
@@ -275,7 +276,16 @@ def convert_csv_to_ucf(csvpath):
                 values.append(col)
             table.append(row)
 
-        writeUCF(table, header_map)
+        json_text = writeUCF(table, header_map)
+        json_file_name = "resources/new_gates.UCF.json"
+        script_dir = os.path.dirname(__file__)
+        json_file_name = os.path.join(script_dir, json_file_name)
+
+        json_file = open(json_file_name, "w")
+        json_file.write(str(json_text))
+        json_file.close()
+
+        return json_file_name
 
 if __name__ == '__main__':
     

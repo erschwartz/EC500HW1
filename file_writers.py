@@ -25,10 +25,10 @@ def write_back_to_csv(gate_dict):
                     gate.cds_dna,
                     gate.terminator,
                     gate.terminator_dna,
-                    gate.ymax,
-                    gate.ymin,
-                    gate.k,
-                    gate.n,
+                    str(gate.ymax),
+                    str(gate.ymin),
+                    str(gate.k),
+                    str(gate.n),
                     gate.il,
                     gate.ih,
                     gate.equation]
@@ -36,12 +36,11 @@ def write_back_to_csv(gate_dict):
         csv_strings.append(csv_string)
 
     csv = "\n".join(csv_strings)
-    file_name = "new_file.csv"
-
-    file = open(file_name, "w")
-    file.write(str(csv))
-    file.close()
-
+    csv_file_name = "resources/new_gates.csv"
     script_dir = os.path.dirname(__file__)
-    csv_file_name = os.path.join(script_dir, file_name)
+    csv_file_name = os.path.join(script_dir, csv_file_name)
+
+    csv_file = open(csv_file_name, "w")
+    csv_file.write(str(csv))
+    csv_file.close()
     return csv_file_name

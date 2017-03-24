@@ -352,6 +352,7 @@ def get_netlist(ctx, jobid, inputs, outputs, verilog, options):
     inputs_text = open(inputs, 'r').read()
     outputs_text = open(outputs, 'r').read()
     verilog_text = open(verilog, 'r').read()
+    print verilog_text
 
     params = {}
     params['id'] = jobid
@@ -362,9 +363,28 @@ def get_netlist(ctx, jobid, inputs, outputs, verilog, options):
 
     r = requests.post(endpoint, params=params, auth=ctx.auth)
 
-
     filename = jobid + "_A000_bionetlist.txt"
     endpoint = ctx.url_root + "/results/" + jobid + "/" + filename
     r = requests.get(endpoint, auth=ctx.auth)
     return r.text
 
+def post_result(ctx, jobid, inputs, outputs, verilog, options):
+    endpoint = ctx.url_root + "/submit"
+
+    script_dir = os.path.dirname(__file__)
+    inputs = os.path.join(script_dir, inputs)
+    outputs = os.path.join(script_dir, outputs)
+    verilog = os.path.join(script_dir, verilog)
+
+    inputs_text = open(inputs, 'r').read()
+    outputs_text = open(outputs, 'r').read()
+    verilog_text = open(verilog, 'r').read()
+
+    params = {}
+    params['id'] = jobid
+    params['input_promoter_data'] = inputs_text
+    params['output_gene_data'] = outputs_text
+    params['verilog_text'] = verilog_text
+    params['options'] = options
+
+    r = requests.post(endpoint, params=params, auth=ctx.auth)

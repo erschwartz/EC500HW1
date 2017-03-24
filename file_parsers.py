@@ -179,11 +179,11 @@ def parse_bio_netlist(bio_netlist, inputs, gates):
 
     #This while loop will continue until we have reached the part where only the inputs exist,
     #not gate connections. It checks that there is no binary.
-    while not bio_netlist_list[bio_netlist_index].split()[1].isdigit():
+    while bio_netlist_index < len(bio_netlist_list) and (len(bio_netlist_list[bio_netlist_index]) < 2 or not bio_netlist_list[bio_netlist_index].split()[1].isdigit()):
         bio_netlist_str_list = bio_netlist_list[bio_netlist_index].split()
         if len(bio_netlist_str_list) == 2:
             parse_single_gate_input(bio_netlist_str_list)
-        else:
+        elif len(bio_netlist_str_list) == 3:
             parse_double_gate_input(bio_netlist_str_list)
         bio_netlist_index += 1
 

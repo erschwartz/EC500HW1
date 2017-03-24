@@ -1,13 +1,9 @@
 import requests
 import json
-import sys
 import os
 import click
 from requests.auth import HTTPBasicAuth
 from Bio import SeqIO
-from ucf_writer import convert_csv_to_ucf
-import io
-import re
 
 class CtxObject(object):
     def __init__(self):
@@ -33,9 +29,7 @@ def result(r):
 @click.pass_context
 def cli(ctx):
     """Command-line interface for Cello genetic circuit design"""
-    print "hey"
     ctx.obj = CtxObject()
-
 
 
 @cli.command()
@@ -372,6 +366,5 @@ def get_netlist(ctx, jobid, inputs, outputs, verilog, options):
     filename = jobid + "_A000_bionetlist.txt"
     endpoint = ctx.url_root + "/results/" + jobid + "/" + filename
     r = requests.get(endpoint, auth=ctx.auth)
-
     return r.text
 

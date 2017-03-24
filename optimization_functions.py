@@ -1,27 +1,47 @@
 from score_calculation import topology_score_finder
 
-def increase_slope(gates):
-    for gate in gates:
-        gate.n *= 1.05
+def increase_slope(gate):
+    """
+        This function will increase the slope of the gate. We generally found that using the highest possible
+        value to affect the slope caused the highest increase/decrease in score, so we decided to use that.
 
-def decrease_slope(gates):
-    for gate in gates:
-        gate.n /= 1.05
+        Attributes:
+            gate [Gate]: The gates for which the slope will be increased
+    """
+    gate.n *= 1.05
 
-def increase_stretch(gates):
-    for gate in gates:
-        gate.ymax *= 1.5
-        gate.ymin /= 1.5
+def decrease_slope(gate):
+    """
+        This function will decrease the slope of the gate. We generally found that using the highest possible
+        value to affect the slope caused the highest increase/decrease in score, so we decided to use that.
 
-def decrease_stretch(gates):
-    odd = True
-    for gate in gates:
-        if odd is True:
-            gate.ymax *= 0.5
-            gate.ymin /= 0.5
-            odd = False
-        else:
-            odd = True
+        Attributes:
+            gate [Gate]: The gates for which the slope will be decreased
+    """
+    gate.n /= 1.05
+
+
+def increase_stretch(gate):
+    """
+        This function will increase the stretch of the gate. We generally found that using the highest possible
+        value to affect the stretch caused the highest increase/decrease in score, so we decided to use that.
+
+        Attributes:
+            gate [Gate]: The gates for which the slope will be decreased
+    """
+    gate.ymax *= 1.5
+    gate.ymin /= 1.5
+
+def decrease_stretch(gate):
+    """
+        This function will decrease the stretch of the gate. We generally found that using the lowest possible
+        value to affect the stretch caused the highest increase/decrease in score, so we decided to use that.
+
+        Attributes:
+            gate [Gate]: The gates for which the slope will be decreased
+    """
+    gate.ymax *= 0.1
+    gate.ymin /= 0.1
 
 def change_y_values(inputs, gate, score):
     print gate.name

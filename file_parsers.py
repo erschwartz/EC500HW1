@@ -129,7 +129,7 @@ def parse_bio_netlist(bio_netlist, inputs, gates):
             inputs[bio_netlist_str_list[2]] = input_one
 
             gate_ext = input_two.name[1:]
-            actual_gate = gates[[chunk for chunk in string_chunks if gate_ext in chunk and chunk != input_one.name][0]]
+            actual_gate = gates[[chunk for chunk in string_chunks if gate_ext in chunk and chunk != input_two.name][0]]
             actual_gate.output = input_two
 
         input_one.gate = gate

@@ -27,31 +27,27 @@ def calculate_score(xmin, xmax):
     return xmax / xmin
 
 def topology_score_finder(starting_inputs):
-    inputs = starting_inputs
-    seen_inputs = {}
+    seen_inputs = {input.name: input for input in starting_inputs}
 
-    while (len(inputs) > 1):
-        for input in inputs:
+    myScore = None
+
+    while (myScore == None):
+        for name, input in seen_inputs.iteritems():
             if input.gate is not None and len(input.gate.inputs) == 1:
-                calculate_response_function_not(input, input.gate)
+                myScore = calculate_response_function_not(input, input.gate)
                 seen_inputs[input.gate.output.name] = input.gate.output
-                inputs.remove(input)
+                del seen_inputs[input.name]
                 break
             elif ((input.gate.inputs[0] == input or input.gate.inputs[0].name in seen_inputs.keys()) and (input.gate.inputs[1] == input or input.gate.inputs[1].name in seen_inputs.keys())):
-                input_2 = seen_inputs[input.gate.inputs[0]] if input.gate.inputs[0] in seen_inputs else seen_inputs[input.gate.inputs[1]]
-                calculate_response_function_not(input, input_2, input.gate)
+                input_2_name = input.gate.inputs[0].name if input.gate.inputs[0].name != name else input.gate.inputs[1].name
+                input_2 = seen_inputs[input_2_name]
+                myScore = calculate_response_function_nor(input, input_2, input.gate)
                 seen_inputs[input.gate.output.name] = input.gate.output
-                inputs.remove(input)
+                del seen_inputs[input.name]
+                del seen_inputs[input_2.name]
                 break
 
-    if inputs[0].gate.output.gate is not None:
-        print "There has been an error, abort mission :("
-    else:
-        if len(inputs[0].gate.inputs) == 1:
-            return calculate_response_function_not(inputs[0], inputs[0].gate)
-        else:
-            input_2 = seen_inputs[inputs[0].gate.inputs[0].name] if inputs[0].gate.inputs[0].name in seen_inputs else seen_inputs[inputs[0].gate.inputs[1].name]
-            return calculate_response_function_nor(inputs[0], input_2, inputs[0].gate)
+    return myScore
 
 
 
